@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FCS Settings Grabber</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f8fafc;
+            color: #334155;
+            line-height: 1.6;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            color: #1e293b;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            color: #64748b;
+            margin-bottom: 1rem;
+        }
+
+        .purpose {
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            border-radius: 8px;
+            padding: 1rem;
+            color: #1e40af;
+            font-weight: 500;
+        }
+
+        .upload-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+        }
+
+        .upload-area {
+            border: 3px dashed #cbd5e1;
+            border-radius: 8px;
+            padding: 3rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            margin: 1.5rem;
+        }
+
+        .upload-area.dragover {
+            border-color: #3b82f6;
+            background-color: #eff6ff;
+        }
+
+        .upload-area.has-files {
+            border-color: #10b981;
+            background-color: #f0fdf4;
+        }
+
+        .upload-icon {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 1rem;
+            opacity: 0.6;
+        }
+
+        .upload-text {
+            font-size: 1.3rem;
+            color: #475569;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .upload-subtext {
+            font-size: 1rem;
+            color: #94a3b8;
+            margin-bottom: 1.5rem;
+        }
+
+        .file-count {
+            font-size: 1.1rem;
+            color: #059669;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        .file-list {
+            font-size: 0.9rem;
+            color: #059669;
+            margin-bottom: 1.5rem;
+            max-height: 100px;
+            overflow-y: auto;
+            background: #f0fdf4;
+            padding: 0.5rem;
+            border-radius: 4px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            min-width: 160px;
+            justify-content: center;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-primary {
+            background-color: #3b82f6;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #2563eb;
+        }
+
+        .btn-success {
+            background-color: #10b981;
+            color: white;
+            font-size: 1.1rem;
+        }
+
+        .btn-success:hover {
+            background-color: #059669;
+        }
+
+        .btn-secondary {
+            background-color: #6b7280;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: #4b5563;
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+            box-shadow: none !important;
+        }
+
+        .results-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .alert {
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .alert-success {
+            background-color: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            color: #059669;
+        }
+
+        .alert-error {
+            background-color: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #dc2626;
+        }
+
+        .alert-info {
+            background-color: #eff6ff;
+            border: 1px solid #bfdbfe;
+            color: #2563eb;
+        }
+
+        .extraction-summary {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .summary-item {
+            text-align: center;
+        }
+
+        .summary-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1e293b;
+        }
+
+        .summary-label {
+            font-size: 0.9rem;
+            color: #64748b;
+            margin-top: 0.25rem;
+        }
+
+        .detector-list {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+
+        .detector-list h4 {
+            color: #374151;
+            margin-bottom: 0.5rem;
+        }
+
+        .detector-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .detector-tag {
+            background: #eff6ff;
+            color: #1e40af;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #3b82f6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid #e2e8f0;
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+
+        .footer p {
+            margin-bottom: 0.5rem;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .upload-area {
+                padding: 2rem 1rem;
+            }
+            
+            .button-group {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .btn {
+                width: 100%;
+                max-width: 250px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>⚡ FCS Settings Grabber</h1>
+            <p>Grab detector voltage settings from FCS files</p>
+            <div class="purpose">
+                <strong>Simple Purpose:</strong> Upload FCS files → Grab all $P*V settings → Download CSV → Manual comparison in Excel
+            </div>
+        </div>
+
+        <!-- Upload Area -->
+        <div class="upload-card">
+            <div class="upload-area" id="uploadArea">
+                <svg class="upload-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+                <div class="upload-text">Drop your FCS files here</div>
+                <div class="upload-subtext">or click to browse and select multiple files</div>
+                
+                <div id="fileInfo" class="hidden">
+                    <div class="file-count" id="fileCount"></div>
+                    <div class="file-list" id="fileList"></div>
+                </div>
+                
+                <input type="file" multiple accept=".fcs" id="fileInput" style="display: none;">
+                
+                <div class="button-group">
+                    <button class="btn btn-primary" onclick="document.getElementById('fileInput').click()">
+                        📁 Browse Files
+                    </button>
+                    <button class="btn btn-success" id="extractBtn" onclick="extractData()" disabled>
+                        <span id="extractBtnText">⚡ Grab Settings</span>
+                    </button>
+                    <button class="btn btn-secondary" id="clearBtn" onclick="clearFiles()" style="display: none;">
+                        🗑️ Clear
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results -->
+        <div id="resultsContainer" class="hidden"></div>
+
+        <!-- Alerts -->
+        <div id="alertContainer"></div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p>🔒 All processing happens in your browser - no files uploaded to servers</p>
+            <p>⚡ This tool only grabs $P*V fields - no analysis or comparison</p>
+            <p>💡 Open the CSV in Excel to manually compare detector settings between files</p>
+        </div>
+    </div>
+
+    <script>
+        let selectedFiles = [];
+        let extractedData = null;
+
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', function() {
+            const fileInput = document.getElementById('fileInput');
+            const uploadArea = document.getElementById('uploadArea');
+
+            fileInput.addEventListener('change', handleFileSelect);
+            uploadArea.addEventListener('click', () => fileInput.click());
+            uploadArea.addEventListener('dragover', handleDragOver);
+            uploadArea.addEventListener('dragleave', handleDragLeave);
+            uploadArea.addEventListener('drop', handleDrop);
+        });
+
+        function handleFileSelect(e) {
+            const files = Array.from(e.target.files);
+            const fcsFiles = files.filter(file => 
+                file.name.toLowerCase().endsWith('.fcs')
+            );
+            
+            if (fcsFiles.length === 0) {
+                showAlert('No FCS files found. Please select .fcs files.', 'error');
+                return;
+            }
+
+            selectedFiles = fcsFiles;
+            updateUI();
+            clearAlert();
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            document.getElementById('uploadArea').classList.add('dragover');
+        }
+
+        function handleDragLeave(e) {
+            e.preventDefault();
+            document.getElementById('uploadArea').classList.remove('dragover');
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            const uploadArea = document.getElementById('uploadArea');
+            uploadArea.classList.remove('dragover');
+            
+            const files = Array.from(e.dataTransfer.files);
+            const fcsFiles = files.filter(file => 
+                file.name.toLowerCase().endsWith('.fcs')
+            );
+            
+            if (fcsFiles.length === 0) {
+                showAlert('No FCS files found. Please drop .fcs files.', 'error');
+                return;
+            }
+
+            selectedFiles = fcsFiles;
+            updateUI();
+            clearAlert();
+        }
+
+        function updateUI() {
+            const uploadArea = document.getElementById('uploadArea');
+            const fileInfo = document.getElementById('fileInfo');
+            const fileCount = document.getElementById('fileCount');
+            const fileList = document.getElementById('fileList');
+            const extractBtn = document.getElementById('extractBtn');
+            const clearBtn = document.getElementById('clearBtn');
+
+            if (selectedFiles.length > 0) {
+                uploadArea.classList.add('has-files');
+                fileInfo.classList.remove('hidden');
+                fileCount.textContent = `✅ ${selectedFiles.length} FCS files selected`;
+                fileList.innerHTML = selectedFiles.map(f => f.name).join('<br>');
+                extractBtn.disabled = false;
+                clearBtn.style.display = 'inline-flex';
+            } else {
+                uploadArea.classList.remove('has-files');
+                fileInfo.classList.add('hidden');
+                extractBtn.disabled = true;
+                clearBtn.style.display = 'none';
+            }
+        }
+
+        function clearFiles() {
+            selectedFiles = [];
+            extractedData = null;
+            document.getElementById('fileInput').value = '';
+            document.getElementById('resultsContainer').classList.add('hidden');
+            updateUI();
+            clearAlert();
+        }
+
+        async function extractData() {
+            if (selectedFiles.length === 0) {
+                showAlert('Please select FCS files first', 'error');
+                return;
+            }
+
+            const extractBtn = document.getElementById('extractBtn');
+            const extractBtnText = document.getElementById('extractBtnText');
+            
+            // Show loading state
+            extractBtn.disabled = true;
+            extractBtnText.innerHTML = '<span class="loading-spinner"></span> Grabbing...';
+            
+            showAlert('Grabbing $P*V values from FCS files...', 'info');
+
+            try {
+                const results = [];
+                const errors = [];
+
+                for (let i = 0; i < selectedFiles.length; i++) {
+                    const file = selectedFiles[i];
+                    showAlert(`Processing ${i + 1}/${selectedFiles.length}: ${file.name}`, 'info');
+                    
+                    try {
+                        const result = await grabPnVValues(file);
+                        results.push(result);
+                        console.log(`Grabbed from ${file.name}:`, result.pnvValues);
+                    } catch (error) {
+                        console.error(`Error with ${file.name}:`, error);
+                        errors.push(`${file.name}: ${error.message}`);
+                    }
+                }
+
+                if (results.length === 0) {
+                    throw new Error('No files could be processed successfully');
+                }
+
+                extractedData = {
+                    results,
+                    errors,
+                    totalFiles: selectedFiles.length,
+                    processedFiles: results.length
+                };
+
+                displayResults(extractedData);
+                generateAndDownloadCSV(extractedData);
+
+            } catch (error) {
+                showAlert(`Grabbing failed: ${error.message}`, 'error');
+                console.error('Extraction error:', error);
+            } finally {
+                extractBtn.disabled = false;
+                extractBtnText.innerHTML = '⚡ Grab Settings';
+            }
+        }
+
+        async function grabPnVValues(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                
+                reader.onload = (e) => {
+                    try {
+                        const arrayBuffer = e.target.result;
+                        
+                        // Basic FCS format validation
+                        const header = new TextDecoder().decode(arrayBuffer.slice(0, 10));
+                        if (!header.startsWith('FCS')) {
+                            throw new Error('Not a valid FCS file');
+                        }
+
+                        // Extract version
+                        const version = header.slice(0, 6);
+                        console.log(`Processing ${file.name}, version: ${version}`);
+
+                        // Read TEXT segment offsets from header
+                        const textStartStr = new TextDecoder().decode(arrayBuffer.slice(10, 18)).trim();
+                        const textEndStr = new TextDecoder().decode(arrayBuffer.slice(18, 26)).trim();
+                        
+                        const textStart = parseInt(textStartStr);
+                        const textEnd = parseInt(textEndStr);
+                        
+                        if (isNaN(textStart) || isNaN(textEnd) || textStart <= 0 || textEnd <= textStart) {
+                            throw new Error('Invalid TEXT segment offsets');
+                        }
+
+                        console.log(`TEXT segment: ${textStart} to ${textEnd}`);
+
+                        // Extract TEXT segment
+                        if (textEnd >= arrayBuffer.byteLength) {
+                            throw new Error('TEXT segment extends beyond file length');
+                        }
+
+                        const textSegment = new TextDecoder('utf-8', {ignoreBOM: true}).decode(
+                            arrayBuffer.slice(textStart, textEnd + 1)
+                        );
+
+                        if (textSegment.length === 0) {
+                            throw new Error('Empty TEXT segment');
+                        }
+
+                        // Parse key-value pairs
+                        const delimiter = textSegment.charAt(0);
+                        console.log(`Using delimiter: "${delimiter}" (char code: ${delimiter.charCodeAt(0)})`);
+                        
+                        const keyValuePairs = textSegment.slice(1).split(delimiter);
+                        const metadata = {};
+                        const pnvValues = {};
+
+                        // Process all key-value pairs
+                        for (let i = 0; i < keyValuePairs.length - 1; i += 2) {
+                            const key = keyValuePairs[i] ? keyValuePairs[i].trim() : '';
+                            const value = keyValuePairs[i + 1] !== undefined ? keyValuePairs[i + 1].trim() : '';
+                            
+                            if (key) {
+                                metadata[key] = value;
+                                
+                                // Look for $P*V patterns (comprehensive search)
+                                const patterns = [
+                                    /^\$P(\d+)V$/i,     // $P1V, $P2V, etc.
+                                    /^P(\d+)V$/i,       // P1V, P2V, etc.
+                                    /^\$P(\d+)G$/i,     // $P1G (gain - alternative to voltage)
+                                    /^P(\d+)G$/i        // P1G
+                                ];
+
+                                for (const pattern of patterns) {
+                                    const match = key.match(pattern);
+                                    if (match) {
+                                        const paramNumber = match[1];
+                                        const standardKey = `$P${paramNumber}V`; // Normalize all to $P*V format
+                                        
+                                        // Don't overwrite if we already found a $P*V version
+                                        if (!pnvValues[standardKey]) {
+                                            pnvValues[standardKey] = value;
+                                            console.log(`Found: ${key} = ${value} (normalized to ${standardKey})`);
+                                        }
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+
+                        console.log(`Total $P*V values found in ${file.name}:`, Object.keys(pnvValues).length);
+
+                        resolve({
+                            filename: file.name,
+                            version: version,
+                            pnvValues: pnvValues,
+                            totalMetadataKeys: Object.keys(metadata).length
+                        });
+
+                    } catch (error) {
+                        reject(new Error(`Error parsing ${file.name}: ${error.message}`));
+                    }
+                };
+
+                reader.onerror = () => reject(new Error(`Failed to read file: ${file.name}`));
+                reader.readAsArrayBuffer(file);
+            });
+        }
+
+        function displayResults(data) {
+            const container = document.getElementById('resultsContainer');
+            
+            // Collect all unique $P*V keys across all files
+            const allPnVKeys = new Set();
+            data.results.forEach(result => {
+                Object.keys(result.pnvValues).forEach(key => allPnVKeys.add(key));
+            });
+
+            const sortedKeys = Array.from(allPnVKeys).sort((a, b) => {
+                // Sort numerically: $P1V, $P2V, $P10V, etc.
+                const aNum = parseInt(a.match(/P(\d+)V/)?.[1] || '0');
+                const bNum = parseInt(b.match(/P(\d+)V/)?.[1] || '0');
+                return aNum - bNum;
+            });
+
+            let html = `
+                <div class="results-card">
+                    <h2 style="color: #1e293b; margin-bottom: 1.5rem;">✅ Settings Grabbed Successfully!</h2>
+                    
+                    <div class="extraction-summary">
+                        <div class="summary-grid">
+                            <div class="summary-item">
+                                <div class="summary-number">${data.processedFiles}</div>
+                                <div class="summary-label">Files Processed</div>
+                            </div>
+                            <div class="summary-item">
+                                <div class="summary-number">${sortedKeys.length}</div>
+                                <div class="summary-label">Detectors Found</div>
+                            </div>
+                            <div class="summary-item">
+                                <div class="summary-number">${data.errors.length}</div>
+                                <div class="summary-label">Errors</div>
+                            </div>
+                        </div>
+                        
+                        ${sortedKeys.length > 0 ? `
+                            <div class="detector-list">
+                                <h4>Detectors Found:</h4>
+                                <div class="detector-tags">
+                                    ${sortedKeys.map(key => `<span class="detector-tag">${key}</span>`).join('')}
+                                </div>
+                            </div>
+                        ` : ''}
+                    </div>
+
+                    <div class="button-group">
+                        <button class="btn btn-success" onclick="generateAndDownloadCSV(extractedData)">
+                            📥 Download CSV Again
+                        </button>
+                    </div>
+            `;
+
+            if (data.errors.length > 0) {
+                html += `
+                    <div style="margin-top: 1.5rem;">
+                        <h3 style="color: #dc2626; margin-bottom: 1rem;">⚠️ Processing Errors:</h3>
+                        <div style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 6px; padding: 1rem;">
+                            ${data.errors.map(error => `<div style="color: #dc2626; margin-bottom: 0.5rem;">• ${error}</div>`).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+
+            html += '</div>';
+            
+            container.innerHTML = html;
+            container.classList.remove('hidden');
+            
+            showAlert(`⚡ Successfully grabbed $P*V settings from ${data.processedFiles} files! CSV downloaded automatically.`, 'success');
+        }
+
+        function generateAndDownloadCSV(data) {
+            // Collect all unique $P*V keys
+            const allPnVKeys = new Set();
+            data.results.forEach(result => {
+                Object.keys(result.pnvValues).forEach(key => allPnVKeys.add(key));
+            });
+
+            const sortedKeys = Array.from(allPnVKeys).sort((a, b) => {
+                const aNum = parseInt(a.match(/P(\d+)V/)?.[1] || '0');
+                const bNum = parseInt(b.match(/P(\d+)V/)?.[1] || '0');
+                return aNum - bNum;
+            });
+
+            // Generate CSV content
+            let csv = '';
+            
+            // Header
+            csv += 'Filename,FCS_Version';
+            sortedKeys.forEach(key => {
+                csv += `,${key}`;
+            });
+            csv += ',Total_PnV_Found,Notes\n';
+
+            // Data rows
+            data.results.forEach(result => {
+                csv += `"${result.filename}","${result.version}"`;
+                
+                sortedKeys.forEach(key => {
+                    const value = result.pnvValues[key];
+                    if (value !== undefined && value !== '') {
+                        csv += `,"${value}"`;
+                    } else {
+                        csv += ',"(not found)"';
+                    }
+                });
+                
+                csv += `,"${Object.keys(result.pnvValues).length}"`;
+                csv += `,"Processed successfully"`;
+                csv += '\n';
+            });
+
+            // Add summary section
+            csv += '\n';
+            csv += '"=== SETTINGS GRAB SUMMARY ==="\n';
+            csv += `"Total Files Processed","${data.processedFiles}"\n`;
+            csv += `"Total Files Selected","${data.totalFiles}"\n`;
+            csv += `"Processing Errors","${data.errors.length}"\n`;
+            csv += `"Unique Detectors Found","${sortedKeys.length}"\n`;
+            csv += `"Extraction Date","${new Date().toISOString()}"\n`;
+
+            if (data.errors.length > 0) {
+                csv += '\n';
+                csv += '"=== ERRORS ==="\n';
+                data.errors.forEach(error => {
+                    csv += `"${error}"\n`;
+                });
+            }
+
+            csv += '\n';
+            csv += '"=== ALL DETECTORS FOUND ==="\n';
+            sortedKeys.forEach(key => {
+                csv += `"${key}","Detector voltage/gain setting"\n`;
+            });
+
+            // Download CSV
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `fcs_settings_grab_${new Date().toISOString().slice(0,10)}_${new Date().toTimeString().slice(0,5).replace(':','')}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function showAlert(message, type) {
+            const container = document.getElementById('alertContainer');
+            const icons = {
+                error: '❌',
+                success: '✅',
+                info: 'ℹ️'
+            };
+            
+            container.innerHTML = `
+                <div class="alert alert-${type}">
+                    <span>${icons[type]}</span>
+                    <span>${message}</span>
+                    <button onclick="clearAlert()" style="margin-left: auto; background: none; border: none; cursor: pointer; font-size: 1.2rem;">×</button>
+                </div>
+            `;
+        }
+
+        function clearAlert() {
+            document.getElementById('alertContainer').innerHTML = '';
+        }
+    </script>
+</body>
+</html>
